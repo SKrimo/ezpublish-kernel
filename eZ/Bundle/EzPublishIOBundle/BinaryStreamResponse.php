@@ -13,6 +13,7 @@ namespace eZ\Bundle\EzPublishIOBundle;
 use DateTime;
 use eZ\Publish\Core\IO\IOServiceInterface;
 use eZ\Publish\Core\IO\Values\BinaryFile;
+use eZ\Publish\Core\IO\Values\MissingBinaryFile;
 use LogicException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -100,7 +101,9 @@ class BinaryStreamResponse extends Response
      */
     public function setAutoLastModified()
     {
-        $this->setLastModified(DateTime::createFromFormat('U', $this->file->mtime->getTimestamp()));
+        if (!($this->file instanceof MissingBinaryFile)) {
+            $this->setLastModified(DateTime::createFromFormat('U', $this->file->mtime->getTimestamp()));
+        }
 
         return $this;
     }

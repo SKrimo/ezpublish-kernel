@@ -8,6 +8,7 @@
  */
 namespace eZ\Publish\Core\IO;
 
+use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 use eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException;
 use eZ\Publish\Core\IO\Exception\InvalidBinaryFileIdException;
 use eZ\Publish\Core\IO\Values\BinaryFile;
@@ -94,7 +95,14 @@ class TolerantIOService extends IOService
 
     public function loadBinaryFileByUri($binaryFileUri)
     {
-        $binaryFileId = $this->removeUriPrefix($this->binarydataHandler->getIdFromUri($binaryFileUri));
+        try {
+            $binaryFileId = $this->removeUriPrefix($this->binarydataHandler->getIdFromUri($binaryFileUri));
+        } catch (InvalidArgumentException $e) {
+            $this->logMissingFile($binaryFileUri);
+
+            return $this->createMissingBinaryFileByUri($binaryFileUri);
+        }
+
         try {
             return $this->loadBinaryFile($binaryFileId);
         } catch (BinaryFileNotFoundException $e) {
@@ -102,6 +110,20 @@ class TolerantIOService extends IOService
 
             return $this->createMissingBinaryFile($binaryFileId);
         }
+    }
+
+    /**
+     * @param $binaryFileUri
+     *
+     * @return MissingBinaryFile
+     */
+    private function createMissingBinaryFileByUri($binaryFileUri)
+    {
+        return new MissingBinaryFile(
+            array(
+                'uri' => $binaryFileUri,
+            )
+        );
     }
 
     /**
