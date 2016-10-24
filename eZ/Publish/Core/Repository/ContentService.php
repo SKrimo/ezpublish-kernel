@@ -1423,6 +1423,9 @@ class ContentService implements ContentServiceInterface
     /**
      * Publishes a content version.
      *
+     * Publishes a content version and deletes archive versions if they overflow max archive versions.
+     * Max archive versions are currently a configuration, but might be moved to be a param of ContentType in the future.
+     *
      * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException if the user is not allowed to publish this version
      * @throws \eZ\Publish\API\Repository\Exceptions\BadStateException if the version is not a draft
      *
@@ -1461,6 +1464,9 @@ class ContentService implements ContentServiceInterface
     /**
      * Publishes a content version.
      *
+     * Publishes a content version and deletes archive versions if they overflow max archive versions.
+     * Max archive versions are currently a configuration, but might be moved to be a param of ContentType in the future.
+     *
      * @throws \eZ\Publish\API\Repository\Exceptions\BadStateException if the version is not a draft
      *
      * @param \eZ\Publish\API\Repository\Values\Content\VersionInfo $versionInfo
@@ -1483,11 +1489,29 @@ class ContentService implements ContentServiceInterface
         $metadataUpdateStruct->publicationDate = $publicationDate;
         $metadataUpdateStruct->modificationDate = $currentTime;
 
+        $contentId = $versionInfo->getContentInfo()->id;
         $spiContent = $this->persistenceHandler->contentHandler()->publish(
-            $versionInfo->getContentInfo()->id,
+            $contentId,
             $versionInfo->versionNo,
             $metadataUpdateStruct
         );
+
+        // Delete version archive overflow if any
+        $archiveList = $this->persistenceHandler->contentHandler()->listVersions(
+            $contentId,
+            APIVersionInfo::STATUS_ARCHIVED
+        );
+
+        // @todo inject limit
+        while (!empty($archiveList) && count($archiveList) > 10) {
+            /** @var \eZ\Publish\SPI\Persistence\Content\VersionInfo $archiveVersion */
+            $archiveVersion = array_shift($archiveList);
+            $this->persistenceHandler->contentHandler()->deleteVersion(
+                $contentId,
+                $archiveVersion->versionNo
+            );
+        }
+
         $content = $this->domainMapper->buildContentDomainObject($spiContent);
 
         $this->publishUrlAliasesForContent($content);

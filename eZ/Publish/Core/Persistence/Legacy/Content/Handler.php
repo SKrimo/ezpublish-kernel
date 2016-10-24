@@ -563,12 +563,13 @@ class Handler implements BaseContentHandler
      * Returns the versions for $contentId.
      *
      * @param int $contentId
+     * @param mixed|null $status Optional argument to filter versions by status, like {@see VersionInfo::STATUS_ARCHIVED}.
      *
      * @return \eZ\Publish\SPI\Persistence\Content\VersionInfo[]
      */
-    public function listVersions($contentId)
+    public function listVersions($contentId, $status = null)
     {
-        return $this->treeHandler->listVersions($contentId);
+        return $this->treeHandler->listVersions($contentId, $status);
     }
 
     /**

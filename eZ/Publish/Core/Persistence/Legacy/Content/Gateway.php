@@ -206,10 +206,11 @@ abstract class Gateway
      * Returns all version data for the given $contentId.
      *
      * @param mixed $contentId
+     * @param mixed|null $status Optional argument to filter versions by status, like {@see VersionInfo::STATUS_ARCHIVED}.
      *
      * @return string[][]
      */
-    abstract public function listVersions($contentId);
+    abstract public function listVersions($contentId, $status = null);
 
     /**
      * Returns all version numbers for the given $contentId.

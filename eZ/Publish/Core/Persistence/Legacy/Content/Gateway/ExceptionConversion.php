@@ -367,13 +367,14 @@ class ExceptionConversion extends Gateway
      * Returns all version data for the given $contentId.
      *
      * @param mixed $contentId
+     * @param mixed|null $status Optional argument to filter versions by status, like {@see VersionInfo::STATUS_ARCHIVED}.
      *
      * @return string[][]
      */
-    public function listVersions($contentId)
+    public function listVersions($contentId, $status = null)
     {
         try {
-            return $this->innerGateway->listVersions($contentId);
+            return $this->innerGateway->listVersions($contentId, $status);
         } catch (DBALException $e) {
             throw new RuntimeException('Database error', 0, $e);
         } catch (PDOException $e) {

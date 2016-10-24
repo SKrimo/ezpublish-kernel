@@ -271,6 +271,9 @@ interface ContentService
     /**
      * Publishes a content version.
      *
+     * Publishes a content version and deletes archive versions if they overflow max archive versions.
+     * Max archive versions are currently a configuration, but might be moved to be a param of ContentType in the future.
+     *
      * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException if the user is not allowed to publish this version
      * @throws \eZ\Publish\API\Repository\Exceptions\BadStateException if the version is not a draft
      *
